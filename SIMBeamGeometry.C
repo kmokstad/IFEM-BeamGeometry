@@ -57,12 +57,13 @@ bool SIMBeamGeometry::parse (const tinyxml2::XMLElement* elem)
     const tinyxml2::XMLElement* geo = elem->FirstChildElement("geometry");
     if (geo && geo->FirstChild())
     {
-      double scale = 1.0;
+      double scale = 1.0, tol = -1.0;
       utl::getAttribute(geo,"scale",scale);
+      utl::getAttribute(geo,"tolerance",tol);
       std::vector<Vec3> vertices;
       std::vector<IntVec> faces;
       int nen = utl::readTesselation(geo->FirstChild()->Value(),
-                                     scale,vertices,faces);
+                                     scale,tol,vertices,faces);
       if (nen > 2 && !vertices.empty() && !faces.empty())
         myGeometry = new GeoBlock(vertices,faces,nen);
     }
@@ -126,7 +127,7 @@ bool SIMBeamGeometry::getBeamSolution (const ASMs1D& patch, const Vec3& X,
 
 int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
                                  double, const char* pvecName, int idBlock,
-                                 int psolComps, bool)
+                                 int psolCmps, bool)
 {
   VTF* vtf = this->getVTF();
   if (psol.empty() || !vtf)
@@ -229,7 +230,7 @@ int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
   std::string pname(pvecName ? pvecName : "d"); pname += "_w";
   for (size_t i = 0; i < sID.size() && !sID[i].empty() && ok; i++)
   {
-    if (myProblem && (!pvecName || psolComps <= 0))
+    if (myProblem && (!pvecName || psolCmps <= 0))
       pname = myProblem->getField1Name(i);
     else if (i > 0 && i%nsd == 0)
     {

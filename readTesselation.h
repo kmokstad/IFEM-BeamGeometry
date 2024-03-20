@@ -23,7 +23,7 @@ using IntVec = std::vector<int>; //!< Convenience type
 namespace utl
 {
   int readTesselation(const std::string& fileName,
-                      double scale,
+                      double scale, double dupTol,
                       std::vector<Vec3>& vertices,
                       std::vector<IntVec>& faces);
 }
