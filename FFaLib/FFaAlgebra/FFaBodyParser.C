@@ -120,7 +120,7 @@ static void skipToDataEnd(std::istream& in, char endChar = '}',
   or on the external VRML or STL formats.
 */
 
-FFaBody* FFaBody::readFromCAD(std::istream& in)
+FFaBody* FFaBody::readFromCAD(std::istream& in, double duplTol)
 {
   std::string firstLine;
   std::getline(in,firstLine);
@@ -131,7 +131,7 @@ FFaBody* FFaBody::readFromCAD(std::istream& in)
   else if (firstLine == "#VRML V2.0 utf8")
     return readWRL(in,2);
   else if (firstLine.substr(0,5) == "solid")
-    return readSTL(in);
+    return readSTL(in,duplTol);
 
   std::cerr <<"FFaBody::readFromCAD: Not a valid geometry file, header = "
             << firstLine << std::endl;
@@ -153,7 +153,7 @@ static std::istream& readLine(std::istream& is, std::string& cline)
 }
 
 
-FFaBody* FFaBody::readSTL(std::istream& in)
+FFaBody* FFaBody::readSTL(std::istream& in, double duplTol)
 {
   std::cout <<"\nFFaBody: Parsing STL data."<< std::endl;
 
@@ -177,7 +177,7 @@ FFaBody* FFaBody::readSTL(std::istream& in)
       {
         std::stringstream strline(cline.substr(6));
         strline >> XYZ;
-        facet.push_back(newBody->addVertex(XYZ));
+        facet.push_back(newBody->addVertex(XYZ,duplTol));
       }
       if (cline.substr(0,7) == "endloop")
       {
