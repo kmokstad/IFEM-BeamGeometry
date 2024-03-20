@@ -24,6 +24,7 @@
   \brief Wrapper for geometry file reader.
   \param[in] fileName Name of geometry file
   \param[in] scale Vertex coordinate scaling factor
+  \param[in] dupTol Tolerance for checking for duplicated vertices
   \param[out] vertices List of vertices
   \param[out] faces List of face topology
 
@@ -32,7 +33,7 @@
 */
 
 int utl::readTesselation (const std::string& fileName,
-                          double scale,
+                          double scale, double dupTol,
                           std::vector<Vec3>& vertices,
                           std::vector<IntVec>& faces)
 {
@@ -53,7 +54,7 @@ int utl::readTesselation (const std::string& fileName,
     slashPos = fileName.find_last_of("/\\",slashPos-1);
   }
   FFaBody::prefix = fileName.substr(0,slashPos+1);
-  FFaBody* body = FFaBody::readFromCAD(is);
+  FFaBody* body = FFaBody::readFromCAD(is,dupTol);
   if (!body)
   {
     std::cerr <<" *** Invalid file or unsupported file format"<< std::endl;
