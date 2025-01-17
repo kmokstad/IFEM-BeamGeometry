@@ -28,7 +28,7 @@ class SIMBeamGeometry : public SIMElasticBar
 {
 public:
   //! \brief The constructor forwards to the parent class constructor.
-  explicit SIMBeamGeometry(const char* hd, unsigned char n = 1)
+  explicit SIMBeamGeometry(const char* hd, unsigned char n = 0)
     : SIMElasticBar(hd,n) {}
   //! \brief Empty destructor.
   virtual ~SIMBeamGeometry() {}
