@@ -15,6 +15,7 @@
 #include "readTesselation.h"
 #include "ASMs1D.h"
 #include "IntegrandBase.h"
+#include "LocalIntegral.h"
 #include "Utilities.h"
 #include "Vec3Oper.h"
 #include "VTF.h"
@@ -91,15 +92,22 @@ bool SIMBeamGeometry::writeGlvG (int& nBlock, const char* inpFile, bool doClear)
 bool SIMBeamGeometry::getBeamSolution (const ASMs1D& patch, const Vec3& X,
                                        Vec3& U, Tensor& T) const
 {
+  class ElementVecs : public LocalIntegral
+  {
+  public:
+    size_t size() const { return vec.front().size(); }
+    double operator[](int i) { return vec.front()[i]; }
+  };
+
   // Find element containing this point
   std::pair<int,double> elm = patch.findElement(X);
   if (elm.first < 1) return false; // Point is not in this patch
 
   // Extract the element displacement vector
-  Vectors eV;
-  if (!myProblem->initElement1(*(patch.begin_elm()+elm.first-1),eV))
+  ElementVecs eV;
+  if (!myProblem->initElement(*(patch.begin_elm()+elm.first-1),eV))
     return false;
-  else if (eV.front().size() != 12)
+  else if (eV.size() != 12)
   {
     // Consider support for higher-order elements later...
     std::cerr <<" *** SIMBeamGeometry::getBeamSolution: For linear element only"
@@ -115,8 +123,8 @@ bool SIMBeamGeometry::getBeamSolution (const ASMs1D& patch, const Vec3& X,
   Vec3 R;
   for (int i = 0; i < 3; i++)
   {
-    U[i] = N1(elm.second)*eV.front()[i]   + N2(elm.second)*eV.front()[6+i];
-    R[i] = N1(elm.second)*eV.front()[3+i] + N2(elm.second)*eV.front()[9+i];
+    U[i] = N1(elm.second)*eV[i]   + N2(elm.second)*eV[6+i];
+    R[i] = N1(elm.second)*eV[3+i] + N2(elm.second)*eV[9+i];
   }
   T = Tensor(R.x,R.y,R.z);
 
