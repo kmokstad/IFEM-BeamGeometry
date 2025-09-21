@@ -203,7 +203,7 @@ FaVec3& FaVec3::normalize (double truncTol)
 FaVec3& FaVec3::round (int precision)
 {
   for (short int i = 0; i < 3; i++)
-    ::round(n[i],precision);
+    n[i] = ::round(n[i],precision);
 
   return *this;
 }
@@ -340,7 +340,7 @@ FaVec3 operator/ (const FaVec3& a, double d)
 {
   if (fabs(d) < EPS_ZERO)
   {
-#if FFA_DEBUG
+#ifdef FFA_DEBUG
     std::cerr <<"FaVec3 operator/(FaVec3&,double): Division by zero, d="<< d
               << std::endl;
 #endif
