@@ -1,38 +1,55 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 
-PROJECT(BeamGeometry)
-MESSAGE(STATUS "Configuring project ${PROJECT_NAME}")
+option(IFEM_USE_FFALIB "Compile with FFaLib?" OFF)
 
-IF(NOT IFEM_CONFIGURED)
-  LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../../../cmake/Modules)
-  FIND_PACKAGE(IFEM REQUIRED)
-  INCLUDE_DIRECTORIES(${IFEM_INCLUDE_DIRS})
-  ADD_DEFINITIONS(${IFEM_DEFINITIONS})
-  STRING(APPEND CMAKE_CXX_FLAGS " ${IFEM_CXX_FLAGS}")
-ENDIF(NOT IFEM_CONFIGURED)
-INCLUDE_DIRECTORIES(${IFEM_INCLUDES})
+project(BeamGeometry LANGUAGES C CXX)
 
-GET_FILENAME_COMPONENT(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${PARENT_SOURCE_DIR} ${PARENT_SOURCE_DIR}/Beam)
+message(STATUS "Configuring project ${PROJECT_NAME}")
 
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+if(NOT TARGET IFEM)
+  if(IFEM_AS_SUBMODULE)
+    add_subdirectory(../../.. IFEM)
+    set(IFEM_PATH ${PROJECT_SOURCE_DIR}/../../..)
+  else()
+    get_filename_component(BUILD_DIR ${PROJECT_BINARY_DIR} NAME)
+    set(IFEM_DIR ${PROJECT_SOURCE_DIR}/../../../${BUILD_DIR})
+    find_package(IFEM REQUIRED)
+  endif()
+endif()
 
-OPTION(IFEM_USE_FFALIB "Compile with FFaLib?" OFF)
-IF(IFEM_USE_FFALIB)
-  MESSAGE(STATUS "Compiling with use of FFaLib")
-  ADD_SUBDIRECTORY(FFaLib)
-  STRING(APPEND CMAKE_CXX_FLAGS " -DHAS_FFALIB")
-ENDIF(IFEM_USE_FFALIB)
+if(NOT TARGET Elasticity)
+  add_subdirectory(.. Elasticity)
+endif()
 
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
-FILE(GLOB BeamGeo_SOURCES *.C)
-FILE(GLOB beamGeo_HEADERS *.h)
-ADD_LIBRARY(BeamGeometry ${BeamGeo_SOURCES})
-IF(TARGET FFaLib)
-  TARGET_LINK_LIBRARIES(BeamGeometry FFaLib)
-ENDIF(TARGET FFaLib)
+if(NOT TARGET Beam)
+  add_subdirectory(../Beam Beam)
+endif()
 
-IF(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
-  MESSAGE(STATUS "Adding dummy testapps target for project ${CMAKE_PROJECT_NAME}")
-  ADD_CUSTOM_TARGET(testapps echo "No apps here" DEPENDS BeamGeometry)
-ENDIF(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+if(IFEM_USE_FFALIB)
+  message(STATUS "Compiling with use of FFaLib")
+  add_subdirectory(FFaLib)
+endif()
+
+ifem_add_library(
+  NAME
+    BeamGeometry
+  SOURCES
+    readTesselation.C
+    SIMBeamGeometry.C
+  HEADERS
+    readTesselation.h
+    SIMBeamGeometry.h
+  LIBRARIES
+    Beam
+)
+target_compile_definitions(BeamGeometry INTERFACE HAS_GEOMETRY=1)
+
+if(TARGET FFaLib)
+  target_link_libraries(BeamGeometry PUBLIC FFaLib)
+endif()
+
+if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+  message(STATUS "Adding dummy testapps target for project ${CMAKE_PROJECT_NAME}")
+  add_custom_target(testapps COMMAND echo "No apps here" DEPENDS BeamGeometry)
+  install(CODE "message(\"No installation here\")")
+endif()
