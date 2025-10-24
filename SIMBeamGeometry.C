@@ -139,7 +139,7 @@ int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
 {
   VTF* vtf = this->getVTF();
   if (psol.empty() || !vtf)
-    return 0; // no primary solution
+    return idBlock; // no primary solution
 
   IntVec vID;
   std::vector<IntVec> sID;
