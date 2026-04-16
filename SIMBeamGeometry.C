@@ -134,8 +134,8 @@ bool SIMBeamGeometry::getBeamSolution (const ASMs1D& patch, const Vec3& X,
 
 
 int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
-                                 double, const char* pvecName, int idBlock,
-                                 int psolCmps, bool)
+                                 double time, const char* pvecName, int idBlock,
+                                 int psolCmps, bool scalarOnly)
 {
   VTF* vtf = this->getVTF();
   if (psol.empty() || !vtf)
@@ -150,7 +150,7 @@ int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
 
   int geomID = this->getStartGeo();
   for (const ASMbase* pch : myModel)
-    if (!pch->empty())
+    if (!pch->empty() || pch->inActive(time))
     {
       if (msgLevel > 1)
         IFEM::cout <<"Writing primary solution for patch "
@@ -161,11 +161,16 @@ int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
       if (!pch->evalSolution(field,lovec,opt.nViz))
         return -1;
 
-      // Output as vector field
-      if (!vtf->writeVres(field,++nBlock,++geomID,nsd))
-        return -2;
-      else
-        vID.push_back(nBlock);
+      ++geomID;
+
+      if (!scalarOnly)
+      {
+        // Output as vector field
+        if (!vtf->writeVres(field,++nBlock,geomID,nsd))
+          return -2;
+        else
+          vID.push_back(nBlock);
+      }
 
       // Output as scalar fields
       for (size_t j = 1; j <= field.rows(); j++)
@@ -207,11 +212,14 @@ int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
         }
       }
 
-    // Output as vector field
-    if (!vtf->writeVres(field,++nBlock,++geomID,nsd))
-      return -2;
-    else
-      vID.push_back(nBlock);
+    if (!scalarOnly)
+    {
+      // Output as vector field
+      if (!vtf->writeVres(field,++nBlock,++geomID,nsd))
+        return -2;
+      else
+        vID.push_back(nBlock);
+    }
 
     // Output as scalar fields
     for (size_t j = 1; j <= field.rows(); j++)
@@ -247,6 +255,7 @@ int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
     }
     else
       ++pname.back();
+
     ok = vtf->writeSblk(sID[i],pname.c_str(),idBlock++,iStep);
   }
 
