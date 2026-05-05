@@ -18,7 +18,7 @@ if(NOT TARGET IFEM)
 endif()
 
 if(NOT TARGET Elasticity)
-  add_subdirectory(.. Elasticity)
+  add_subdirectory(../Elasticity Elasticity)
 endif()
 
 if(NOT TARGET Beam)
