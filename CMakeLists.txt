@@ -17,11 +17,11 @@ if(NOT TARGET IFEM)
   endif()
 endif()
 
-if(NOT TARGET Elasticity)
+if(NOT TARGET IFEM::Elasticity)
   add_subdirectory(../Elasticity Elasticity)
 endif()
 
-if(NOT TARGET Beam)
+if(NOT TARGET IFEM::Beam)
   add_subdirectory(../Beam Beam)
 endif()
 
@@ -42,7 +42,7 @@ ifem_add_library(
     readTesselation.h
     SIMBeamGeometry.h
   LIBRARIES
-    Beam
+    IFEM::Beam
 )
 target_compile_definitions(BeamGeometry INTERFACE HAS_GEOMETRY=1)
 

@@ -5,6 +5,8 @@ project(FFaLib LANGUAGES C CXX)
 ifem_add_library(
   NAME
     FFaLib
+  ALIAS:
+    IFEM::FFaLib
   SOURCES
     FFaAlgebra/FFaBody.C
     FFaAlgebra/FFaBodyParser.C
