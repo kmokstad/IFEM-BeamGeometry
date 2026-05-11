@@ -33,6 +33,8 @@ endif()
 ifem_add_library(
   NAME
     BeamGeometry
+  ALIAS
+    IFEM::BeamGeometry
   SOURCES
     readTesselation.C
     SIMBeamGeometry.C
