@@ -34,7 +34,7 @@ public:
   //! \brief Writes current model geometry to the VTF-file.
   //! \details This method is overridden to also write out
   //! the tesselated geometry of the beam.
-  virtual bool writeGlvG(int& nBlock, const char* inpFile, bool doClear);
+  virtual bool writeGlvG(int& nBlock, double time, bool append);
 
   //! \brief Writes primary solution for a given load/time step to the VTF-file.
   //! \param[in] psol Primary solution vector

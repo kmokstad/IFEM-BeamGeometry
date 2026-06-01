@@ -74,9 +74,9 @@ bool SIMBeamGeometry::parse (const tinyxml2::XMLElement* elem)
 }
 
 
-bool SIMBeamGeometry::writeGlvG (int& nBlock, const char* inpFile, bool doClear)
+bool SIMBeamGeometry::writeGlvG (int& nBlock, double time, bool append)
 {
-  if (!this->SIMElasticBar::writeGlvG(nBlock,inpFile,doClear))
+  if (!this->SIMElasticBar::writeGlvG(nBlock,time,append))
     return false;
   else if (!myGeometry)
     return true;
