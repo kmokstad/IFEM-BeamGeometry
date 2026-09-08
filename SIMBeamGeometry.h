@@ -32,9 +32,7 @@ public:
     : SIMElasticBar(hd,n) {}
 
   //! \brief Writes current model geometry to the VTF-file.
-  //! \details This method is overridden to also write out
-  //! the tesselated geometry of the beam.
-  virtual bool writeGlvG(int& nBlock, double time, bool append);
+  virtual int writeGlvG(int& nBlock, double time, bool append);
 
   //! \brief Writes primary solution for a given load/time step to the VTF-file.
   //! \param[in] psol Primary solution vector
@@ -45,9 +43,6 @@ public:
   //! \param[in] idBlock Starting value of result block numbering
   //! \param[in] psolCmps Optional number of primary solution components
   //! \param[in] scalarOnly If \e true, write vector as scalar components only
-  //!
-  //! \details This method is overridden to also write out the deformation
-  //! on the tesselated geometry based on interpolation of the beam solution.
   virtual int writeGlvS1(const Vector& psol, int iStep, int& nBlock,
                          double time, const char* pvecName,
                          int idBlock, int psolCmps, bool scalarOnly);
@@ -55,8 +50,6 @@ public:
 protected:
   using SIMElasticBar::parse;
   //! \brief Parses a data section from an XML element.
-  //! \details This method is overridden to also read in
-  //! the tesselated geometry used for visualizing the beam.
   virtual bool parse(const tinyxml2::XMLElement* elem);
 
   //! \brief Evaluates the interpolated beam solution at a specified point.

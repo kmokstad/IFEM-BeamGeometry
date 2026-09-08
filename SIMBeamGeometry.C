@@ -51,6 +51,11 @@ public:
 };
 
 
+/*!
+  This method is overridden to also read in the tesselated geometry
+  used for visualizing the beam.
+*/
+
 bool SIMBeamGeometry::parse (const tinyxml2::XMLElement* elem)
 {
   if (!strcasecmp(elem->Value(),"postprocessing"))
@@ -74,18 +79,24 @@ bool SIMBeamGeometry::parse (const tinyxml2::XMLElement* elem)
 }
 
 
-bool SIMBeamGeometry::writeGlvG (int& nBlock, double time, bool append)
+/*!
+  This method is overridden to also write out the tesselated beam geometry.
+*/
+
+int SIMBeamGeometry::writeGlvG (int& nBlock, double time, bool append)
 {
-  if (!this->SIMElasticBar::writeGlvG(nBlock,time,append))
-    return false;
-  else if (!myGeometry)
-    return true;
+  int ret = this->SIMElasticBar::writeGlvG(nBlock,time,append);
+  if (ret <= 0 || !myGeometry)
+    return ret;
 
   if (msgLevel > 1)
     IFEM::cout <<"Writing tesselated geometry to VTF ("
                << myGeometry->getNoNodes() <<")"<< std::endl;
 
-  return this->getVTF()->writeGrid(myGeometry,"Tesselated geometry",++nBlock);
+  if (!this->getVTF()->writeGrid(myGeometry,"Tesselated geometry",++nBlock))
+    return -978;
+
+  return ret;
 }
 
 
@@ -132,6 +143,11 @@ bool SIMBeamGeometry::getBeamSolution (const ASMs1D& patch, const Vec3& X,
   return true;
 }
 
+
+/*!
+  This method is overridden to also write out the deformation
+  on the tesselated geometry based on interpolation of the beam solution.
+*/
 
 int SIMBeamGeometry::writeGlvS1 (const Vector& psol, int iStep, int& nBlock,
                                  double time, const char* pvecName, int idBlock,
